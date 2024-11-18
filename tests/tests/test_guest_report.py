@@ -37,3 +37,50 @@ def test_guest_report(qm):
     m.check_exec(f'python3 {guest_workdir}/tests/guest/test_tdreport.py')
 
     qm.stop()
+
+def test_guest_report_2vms():
+    """
+    When we run 2 VMs
+    The reports generated for these 2 VMs should be identical
+    """
+    qm1 = Qemu.QemuMachine()
+    qm2 = Qemu.QemuMachine()
+
+    with qm1, qm2:
+        qm1.run()
+        qm2.run()
+
+        m1 = Qemu.QemuSSH(qm1)
+        deploy_and_setup(m1)
+        m2 = Qemu.QemuSSH(qm2)
+        deploy_and_setup(m2)
+
+        report1 = get_report(m1)
+        report2 = get_report(m2)
+
+        assert len(report1) > 0
+        assert report1 == report2, f'The reports are not identical {report1} - {report2}'
+
+        qm1.stop()
+        qm2.stop()
+
+def test_guest_report_reboot(qm):
+    """
+    The report after VM reboot should not be the same
+    the field tee_info_hash should be different
+    """
+    qm.run()
+    m = Qemu.QemuSSH(qm)
+    deploy_and_setup(m)
+
+    report1 = get_report(m)
+
+    qm.reboot()
+    m = Qemu.QemuSSH(qm)
+
+    report2 = get_report(m)
+
+    assert len(report1) > 0
+    assert report1 == report2, f'The reports are not identical {report1} - {report2}'
+
+    qm.stop()

@@ -16,6 +16,7 @@
 #
 
 import os
+import json
 import Qemu
 
 script_path=os.path.dirname(os.path.realpath(__file__)) + '/'
@@ -25,3 +26,8 @@ guest_workdir='/var/tmp/tdxtest'
 def deploy_and_setup(m : Qemu.QemuSSH):
     m.rsync_file(f'{script_path}/../', f'{guest_workdir}')
     m.check_exec(f'cd {guest_workdir} && ./lib/setup_guest.sh')
+
+def get_report(ssh):
+    _, stderr = ssh.check_exec('tdreport')
+    report = stderr.read().decode('utf-8')
+    return json.loads(report)
