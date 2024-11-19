@@ -18,7 +18,9 @@
 #
 
 import os
+import hashlib
 import time
+import base64
 
 import Qemu
 import util
@@ -38,9 +40,37 @@ def test_guest_report(qm):
 
     qm.stop()
 
+def test_guest_report_mrconfigid(qm):
+    """
+    mrconfigid, mrowner and mrownerconfig in the report should be equal
+    to the values we pass to qemu
+    """
+    machine = qm.qcmd.plugins['machine']
+
+    mrconfigid = hashlib.sha384()
+    machine.add_mrconfigid(mrconfigid.digest())
+    mrowner = hashlib.sha384()
+    machine.add_mrowner(mrowner.digest())
+    mrownerconfig = hashlib.sha384()
+    machine.add_mrownerconfig(mrownerconfig.digest())
+
+    qm.run()
+
+    m = Qemu.QemuSSH(qm)
+    deploy_and_setup(m)
+
+    report = get_report(m)
+
+    # mrconfig, mrowner, mrownerconfig in the report are hex strings
+    assert report['td_info']['mrconfigid'] == mrconfigid.hexdigest()
+    assert report['td_info']['mrowner'] == mrowner.hexdigest()
+    assert report['td_info']['mrownerconfig'] == mrownerconfig.hexdigest()
+
+    qm.stop()
+
 def test_guest_report_2vms():
     """
-    When we run 2 VMs
+    When we run 2 VMs with same image
     The reports generated for these 2 VMs should be identical
     """
     qm1 = Qemu.QemuMachine()

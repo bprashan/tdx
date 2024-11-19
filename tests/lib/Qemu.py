@@ -16,6 +16,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import base64
 import enum
 import os
 import logging
@@ -182,6 +183,9 @@ class QemuMachineType:
     def __init__(self, machine = QemuEfiMachine.OVMF_Q35_TDX):
         self.machine = machine
         self.qgs_addr = None
+        self.mrconfigid = None
+        self.mrowner = None
+        self.mrownerconfig = None
     def enable_qgs_addr(self, addr : dict = {'type': 'vsock', 'cid':'2','port':'4050'}):
         """
         Enable the QGS (Quote Generation Service) address
@@ -190,12 +194,30 @@ class QemuMachineType:
         By default, the address is a vsock address with cid=2 (host cid) and port=4050
         """
         self.qgs_addr = addr
+    def add_mrconfigid(self, mrconfigid : str):
+        self.mrconfigid = mrconfigid
+    def add_mrowner(self, mrowner : str):
+        self.mrowner = mrowner
+    def add_mrownerconfig(self, mrownerconfig : str):
+        self.mrownerconfig = mrownerconfig
+
     def args(self):
         qemu_args = self.Qemu_Machine_Params[self.machine]
         if self.machine == QemuEfiMachine.OVMF_Q35_TDX:
             tdx_object = {'qom-type':'tdx-guest', 'id':'tdx'}
             if self.qgs_addr:
                 tdx_object.update({'quote-generation-socket': self.qgs_addr})
+            if self.mrconfigid:
+                # mrconfigid argument passed to qemu
+                # must be a base64 encoded of a sha384 hash value
+                _mrconfigid = base64.b64encode(self.mrconfigid)
+                tdx_object.update({'mrconfigid': _mrconfigid.decode('utf-8')})
+            if self.mrowner:
+                _mrowner = base64.b64encode(self.mrowner)
+                tdx_object.update({'mrowner': _mrowner.decode('utf-8')})
+            if self.mrownerconfig:
+                _mrownerconfig = base64.b64encode(self.mrownerconfig)
+                tdx_object.update({'mrownerconfig': _mrownerconfig.decode('utf-8')})
             qemu_args = ['-object', str(tdx_object)] + qemu_args
         return qemu_args
 
