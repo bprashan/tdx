@@ -21,7 +21,13 @@ from common import *
 
 def test_guest_boot(qm):
     """
-    Boot TD
+    Check successful TD VM creation
+    To make sure the TD is properly initialized, we check two things in the guest:
+    - The presence of the device /dev/tdx_guest, this means that the guest driver
+      kernel module has been properly loaded and initialized.
+    - The presence of the ACPI CCEL table, this table contains the event log
+      of the guest boot process and this event log will be used to compute
+      different RTMR measurement values.
     """
     qm.run()
 
@@ -38,6 +44,9 @@ def test_guest_boot(qm):
 
 def test_guest_early_printk(qm):
     """
+    Check that the earlyprintk kernel argument will not prevent
+    the TD from working properly.
+
     Test Early Printk with Debug Off (Intel Case ID 018)
     """
 

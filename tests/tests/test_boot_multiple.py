@@ -22,6 +22,11 @@ import Qemu
 
 def test_4vcpus_1socket_10times(qm):
     """
+    Check multiple TD creations
+    We repeat the creation and destruction of TD (with 4 vcpus) and make sure that
+    the they all work. The choice of 4 vcpus for the guest is arbitrary and there
+    is not reason for it.
+
     Test 4vcpus 1socket 10 times (Intel Case ID 009)
     """
 
@@ -35,6 +40,11 @@ def test_4vcpus_1socket_10times(qm):
 
 def test_4vcpus_2sockets_5times(qm):
     """
+    Check multiple TD creations
+    We repeat the creation and destruction of TD and make sure that
+    the they all work.
+    Reach TD is configured to have 4 vcpu and 2 CPU sockets.
+
     Test 4vcpus 2sockets 5 times (Intel Case ID 010)
     """
 

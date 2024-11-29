@@ -24,7 +24,7 @@ import util
 
 def test_coexist_boot():
     """
-    Boot check
+    Check that a TD and normal VM can be created and running at the sametime
     """
     qm = Qemu.QemuMachine('td',
                                QemuEfiMachine.OVMF_Q35_TDX,
