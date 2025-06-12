@@ -49,6 +49,7 @@ def test_guest_memory_confidentiality_no_tdx(qm):
         qssh.check_exec(CHECK_EXEC)
 
         qmon.send_command('dump-guest-memory %s' % (MEMORY_FILE))
+        time.sleep(5)
 
         rc = check_for_string(MEMORY_FILE, CHECK_EXEC)
         assert rc == 0, 'Failed finding %s in %s' % (CHECK_EXEC, MEMORY_FILE)
@@ -72,6 +73,7 @@ def test_guest_memory_confidentiality_tdx(qm):
         qssh.check_exec(CHECK_EXEC)
 
         qmon.send_command('dump-guest-memory %s' % (MEMORY_FILE))
+        time.sleep(5)
 
         rc = check_for_string(MEMORY_FILE, CHECK_EXEC)
         assert rc == 1, 'Failed by finding %s in %s' % (CHECK_EXEC, MEMORY_FILE)
